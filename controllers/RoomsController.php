@@ -30,9 +30,13 @@
         public function actionStore(){
             $params = \yii::$app->request->post();
             $room = new Rooms();
+            $room->attributes = $params;
             $now = date("Y-m-d H:i:s");
-            $room->room_number = $params['room_number'];
             $room->created_at = $now;
+            if (!$room->validate()) {
+                $errors = $room->errors;
+                return array('success' => false, 'errors' => $errors, 'data' => []);
+            }
             if ($room->save()) {
                 for ($i=1; $i <= 30; $i++) { 
                     $nowDate = date("Y-m-d H:i:s");
@@ -55,12 +59,23 @@
         public function actionEdit(){
             $params=\yii::$app->request->post();
             $model = RoomsDayPrice::findOne($params['id']);
-            $model->attributes=$params;
-            if ($model->save()) {
-                return array('success' => true,'message'=> 'Update successfuly.');
+            if($model){
+                $params['date'] = $model->date;
+                $params['room_id'] = $model->room_id;
+                $model->attributes=$params;
+                if (!$model->validate()) {
+                    $errors = $model->errors;
+                    return array('success' => false, 'errors' => $errors, 'data' => []);
+                }
+                if ($model->save()) {
+                    return array('success' => true,'message'=> 'Update successfuly.');
+                }else{
+                    return array('success' => false,'message'=> 'Something went wrong please try again!');
+                }
             }else{
-                return array('success' => false,'message'=> 'Something went wrong please try again!');
+                return array('success' => false,'message'=> 'No data found');
             }
+            
         }
         public function actionList(){
             $rooms = Rooms::find()->with(['price'])->asArray()->all();

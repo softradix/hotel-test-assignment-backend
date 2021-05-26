@@ -28,6 +28,7 @@ class Rooms extends \yii\db\ActiveRecord
     {
         return [
             [['room_number'], 'required'],
+            [['room_number'], 'unique'],
             [['created_at'], 'safe'],
             [['room_number'], 'string', 'max' => 255],
         ];
